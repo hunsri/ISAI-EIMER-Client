@@ -65,7 +65,7 @@ public class PathFinder {
         return move;
     }
 
-    public static LinkedList<Move> fetchLegalMoves(Board board, int player) {
+    public static LinkedList<Move> findAllLegalMovesList(Board board, int player) {
         return convertToMoveList(findAllLegalMoves(board, player), player);
     }
 
@@ -183,7 +183,7 @@ public class PathFinder {
             case 4:
                 return -2;
             default:
-                throw new IllegalArgumentException("The given index has no move representation!");
+                throw new IllegalArgumentException("The given index (" + index + ") has no move representation!");
         }
     }
 
@@ -195,8 +195,11 @@ public class PathFinder {
             if(!moves[i][VALIDITY_INDEX])
                 continue; //to the next entry if move is invalid
 
-            for(int j = 0; j < moves[i].length; j++) {
-                moveList.add(new Move(player, convertIndexToMove(i) , convertIndexToMove(j)));
+            // -1 since we don't want to include the validity index
+            for(int j = 0; j < moves[i].length-1; j++) {
+                if(moves[i][j] == true) {
+                    moveList.add(new Move(player, convertIndexToMove(i) , convertIndexToMove(j)));
+                }
             }
         }
 

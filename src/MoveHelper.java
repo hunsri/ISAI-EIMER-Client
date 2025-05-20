@@ -1,19 +1,4 @@
-import java.util.HashMap;
-
 public class MoveHelper {
-
-    // public static HashMap<Integer, Integer> INVERSE = obtainInverse();
-
-    // public static HashMap<Integer, Integer>  obtainInverse() {
-    //     HashMap<Integer, Integer> inverse = new HashMap<Integer, Integer>();
-        
-    //     inverse.put(0, -1);
-    //     inverse.put(-1, 0);
-    //     inverse.put(1, -2);
-    //     inverse.put(-2, 1);
-
-    //     return inverse;
-    // }
 
     /**
      * Returns the inverse of a given move.
@@ -46,6 +31,15 @@ public class MoveHelper {
                 return 1000; // returning a non existing move, since 2 has no inverse
             default:
                 throw new IllegalArgumentException();
+        }
+    }
+
+    public static int nextPlayer(int currentPlayer) {
+        if(currentPlayer >= GameState.MAX_PLAYERS-1) {
+            return 0;
+        }
+        else {
+            return currentPlayer+1;
         }
     }
 }

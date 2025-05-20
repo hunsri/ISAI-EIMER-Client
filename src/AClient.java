@@ -9,10 +9,13 @@ import lenz.htw.eimer.*;
 
 public class AClient {
     public static void main(String[] args) throws IOException {
+
         NetworkClient client = new NetworkClient("127.0.0.1", "AClient", ImageIO.read(new File("res/playerIconA.png")));
 
         GameState gameState = new GameState();
         int playerNumber = client.getMyPlayerNumber();
+        
+        GameTree gameTree = new GameTree(playerNumber);
         
         PathFinder pathFinder = new PathFinder(playerNumber, gameState);
 
