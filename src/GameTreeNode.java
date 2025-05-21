@@ -59,7 +59,7 @@ public class GameTreeNode {
 
         this.parent = parent;
         this.move = move;
-        this.currentFavoredPlayer = MoveHelper.nextPlayer(move.player);
+        this.currentFavoredPlayer = MoveHelper.nextPlayer(move.player); //next move favors this player 
         this.currentDepth = depth;
         
         //setting the board to its new state for this node
@@ -72,6 +72,7 @@ public class GameTreeNode {
         if(globalFavoredPlayer == currentFavoredPlayer) {
             nodeValue = parent.nodeValue + nodeValue;
         } else {
+            //if opponent makes a good move, then the value gets removed
             nodeValue = parent.nodeValue - nodeValue;
         }
     }
@@ -81,19 +82,68 @@ public class GameTreeNode {
      * Stops once the given max_depth has been reached or no valid moves are available anymore.
      *
      */
-    public static void generateChildrenRecusively(GameTreeNode gtn, int max_depth) {
+    public static LinkedList<Move> generateChildrenRecusively(GameTreeNode gtn, int max_depth) {
         
+        LinkedList<Move> optimalPath = new LinkedList<>();
+
         //end condition for recursion
         if(gtn.currentDepth >= max_depth){
-            return;
+            return optimalPath;
         }
-        
+
         //Recursively building the tree
         if(generateChildren(gtn)) {
             for(int i = 0; i < gtn.children.length; i++) {
-                generateChildrenRecusively(gtn.children[i], max_depth);
+                optimalPath = generateChildrenRecusively(gtn.children[i], max_depth);
+            }
+            optimalPath.add(updateNodeValue(gtn));
+        }
+
+        return optimalPath;
+    }
+
+    /**
+     * Propagates the extreme node values up in the hierarchy.
+     * Automatically picks either the max or min value, depending on whos turn it is.
+     * This forms the basis for the Alpha Beta search.
+     * 
+     * @param gtn The {@link #GameTreeNode} to propagate the values up to
+     * @return the move which lead to the extrema
+     */
+    private static Move updateNodeValue(GameTreeNode gtn) {
+        
+        boolean min; // whether to min or to max;
+        int extremeMinMaxValue = 0;
+        Move minMaxMove = null;
+
+        if(gtn.currentFavoredPlayer == gtn.globalFavoredPlayer)
+            min = false; //if the current player is the player that needs to win
+        else
+            min = true; //otherwise the opponent will want to minimize the value
+
+        if(!min) {
+            //maximize
+            extremeMinMaxValue = Integer.MIN_VALUE;
+            for(int i = 0; i < gtn.children.length; i++) {
+                if(gtn.children[i].nodeValue > extremeMinMaxValue) {
+                    extremeMinMaxValue = gtn.children[i].nodeValue;
+                    minMaxMove = gtn.children[i].move;
+                }
             }
         }
+        else {
+            //minimize
+            extremeMinMaxValue = Integer.MAX_VALUE;
+            for(int i = 0; i < gtn.children.length; i++) {
+                if(gtn.children[i].nodeValue < extremeMinMaxValue) {
+                    extremeMinMaxValue = gtn.children[i].nodeValue;
+                    minMaxMove = gtn.children[i].move;
+                }
+            }
+        }
+
+        gtn.nodeValue = extremeMinMaxValue;
+        return minMaxMove;
     }
 
     /**
@@ -104,16 +154,12 @@ public class GameTreeNode {
      */
     public static boolean generateChildren(GameTreeNode gtn) {
         
-        // if(gtn.currentDepth >= MAX_DEPTH)
-        //     return false;
-
         //finding all legal moves for the next player
         LinkedList<Move> moves = PathFinder.findAllLegalMovesList(gtn.board, MoveHelper.nextPlayer(gtn.move.player));
         
         gtn.children = new GameTreeNode[moves.size()];
 
         for(int i = 0; i < moves.size(); i++) {
-            
             gtn.children[i] = new GameTreeNode(gtn, moves.get(i), gtn.currentDepth+1);
         }
         

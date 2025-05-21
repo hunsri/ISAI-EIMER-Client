@@ -1,5 +1,6 @@
 public class BoardAnalyzer {
 
+    //if issues arise, change so that only the position of the given player gets evaluated 
     public static int evaluatePlayerPosition(Board board, int player) {
 
         int[] playerPointsThisRound = calculatePointsForRound(board);
