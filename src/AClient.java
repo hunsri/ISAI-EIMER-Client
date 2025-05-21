@@ -15,7 +15,7 @@ public class AClient {
         GameState gameState = new GameState();
         int playerNumber = client.getMyPlayerNumber();
         
-        GameTree gameTree = new GameTree(playerNumber);
+        //GameTree gameTree = new GameTree(playerNumber);
         
         PathFinder pathFinder = new PathFinder(playerNumber, gameState);
 
@@ -26,10 +26,13 @@ public class AClient {
 
         System.out.println("Player Number: " + (playerNumber+1) + " ,index: "+ playerNumber);
 
+        System.out.println("Unique available moves:"+ (PathFinder.findAllLegalMovesList(gameState.getBoard(), playerNumber)).size());
+
         for (;;) {
             while ((move = client.receiveMove()) != null) {
                 //System.out.println("Move: "+ move);
                 gameState.moveStones(move);
+                System.out.println(gameState.getBoard());
                 // Zug in meine Spielbrettrepräsentation einbauen
             }
             
@@ -41,14 +44,14 @@ public class AClient {
             //         dontMove = false;
             // }
 
-            pathFinder = new PathFinder(playerNumber, gameState);
+            // pathFinder = new PathFinder(playerNumber, gameState);
+
             move = pathFinder.pickRandomMove();
             //move = new Move(playerNumber, 0, 1);
 
             System.out.println("Sending Move: "+ move);
             client.sendMove(move);
             gameState.calculateScores();
-            System.out.println(gameState);
 
             gameState.incrementRound();
         }

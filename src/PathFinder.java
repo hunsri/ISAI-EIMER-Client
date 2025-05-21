@@ -92,18 +92,20 @@ public class PathFinder {
 
         boolean[][] moves = new boolean[5][6];
 
+        LinkedList<Board> usedStates = new LinkedList<Board>(); 
+        usedStates.add(board.clone());
+
         if(board.getStonesOnRingForPlayer(playerID, 0) > 0) {
-            moves[0] = findSecondaryValidMove(board, playerID, 0);
+            moves[0] = findSecondaryValidMove(board, playerID, 0, usedStates);
         }
         if(board.getStonesOnRingForPlayer(playerID, 1) > 0) {
-            moves[1] = findSecondaryValidMove(board, playerID, 1);
-            moves[2] = findSecondaryValidMove(board, playerID, -1);
+            moves[1] = findSecondaryValidMove(board, playerID, 1, usedStates);
+            moves[2] = findSecondaryValidMove(board, playerID, -1, usedStates);
         }
         if(board.getStonesOnRingForPlayer(playerID, 2) > 0) {
-            moves[3] = findSecondaryValidMove(board, playerID, 2);
-            moves[4] = findSecondaryValidMove(board, playerID, -2);
+            moves[3] = findSecondaryValidMove(board, playerID, 2, usedStates);
+            moves[4] = findSecondaryValidMove(board, playerID, -2, usedStates);
         }
-        
         return moves;
     }
 
@@ -112,45 +114,39 @@ public class PathFinder {
      * A returned index of [5] == true indicates that one or more secondary moves are available
      * 
      * @param board The board setup to be analyzed
-     * @param firstMove
+     * @param playerID
+     * @param firstMove The move that this second move is dependent on
      * @return All allowed secondary moves, given a first move
      */
-    private static boolean[] findSecondaryValidMove(Board board, int playerID, int firstMove){     
+    private static boolean[] findSecondaryValidMove(Board board, int playerID, int firstMove, LinkedList<Board> forbiddenStates){     
         
         boolean[] secondMoves = new boolean[6];
-
-        int forbidden = MoveHelper.inverseOf(firstMove);
 
         Board tempBoard = board.clone();
         tempBoard.moveStoneForPlayer(playerID, firstMove);
 
-        if(tempBoard.getStonesOnRingForPlayer(playerID, 0) > 0) {
-            if(forbidden != 0) {
-                secondMoves[0] = true;
-                secondMoves[5] = true;
-            }
-        }
-        if(tempBoard.getStonesOnRingForPlayer(playerID, 1) > 0) {
-            if(forbidden != 1) {
-                secondMoves[1] = true;
-                secondMoves[5] = true;
-            }
-            if(forbidden != -1) {
-                secondMoves[2] = true;
-                secondMoves[5] = true;
-            }
-        }
-        if(tempBoard.getStonesOnRingForPlayer(playerID, 2) > 0) {
-            if(forbidden != 2) {
-                secondMoves[3] = true;
-                secondMoves[5] = true;
-            }
-            if(forbidden != -2) {
-                secondMoves[4] = true;
-                secondMoves[5] = true;
+        //5 possible moves on the board
+        for(int i = 0; i < 5; i++) {
+            Board boardAfterSecondMove = canMoveStoneCheck(tempBoard, playerID, i, forbiddenStates);
+            if(boardAfterSecondMove != null){
+                secondMoves[i] = true;
+                secondMoves[VALIDITY_INDEX] = true; //setting the second move to valid
+
+                forbiddenStates.add(boardAfterSecondMove); //once accepted adds to the list of unavailable ones to avoid duplicates
             }
         }
         return secondMoves;
+    }
+
+    private static Board canMoveStoneCheck(Board board, int playerID, int moveIndex, LinkedList<Board> forbiddenStates){
+        Board tempBoard = board.clone();
+
+        boolean legit_move = tempBoard.moveStoneForPlayer(playerID, convertIndexToMove(moveIndex));
+
+        if(!forbiddenStates.contains(tempBoard) && legit_move)
+            return tempBoard;
+        else
+            return null;
     }
 
     /**

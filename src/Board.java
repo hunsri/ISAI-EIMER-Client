@@ -11,10 +11,14 @@ public class Board {
             initBoard();
     }
 
-    public void moveStoneForPlayer(int playerID, int move) {
+    public boolean moveStoneForPlayer(int playerID, int move) {
         
         boolean moveInside = move >= 0 ? true : false;
         move = Math.abs(move);
+
+        if(getStonesOnRingForPlayer(playerID, move) < 1) {
+            return false; //no stone present, invalid move
+        }
 
         stones[playerID][move]--;
 
@@ -23,6 +27,8 @@ public class Board {
         } else {
             stones[playerID][move - 1]++;
         }
+
+        return true;
     }
 
     private void initBoard() {
@@ -89,5 +95,36 @@ public class Board {
             }
         }
         return scoreForThisBoard;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Board:\n");
+        for (int i = 0; i < stones.length; i++) {
+            sb.append("Player ").append(i).append(": ");
+            for (int j = 0; j < stones[i].length; j++) {
+                sb.append(stones[i][j]);
+                if (j < stones[i].length - 1) {
+                    sb.append(" ");
+                }
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(this.toString().equals(o.toString()))
+            return true;
+        else
+            return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 31 * this.toString().hashCode();
+        return result;
     }
 }
