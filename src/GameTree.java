@@ -6,25 +6,33 @@ import lenz.htw.eimer.Move;
 public class GameTree {
 
     //four rounds
-    public static int MAX_DEPTH = 1*GameState.MAX_PLAYERS;
+    public static int MAX_DEPTH = 2*GameState.MAX_PLAYERS;
 
     private GameTreeNode root;
 
-    private HashMap<String, GameTreeNode> archive; 
+    private HashMap<String, GameTreeNode> archive;
+
+    private LinkedList<Move> bestPath = new LinkedList<Move>();
 
     public GameTree(int favoredPlayer){
         Board board = new Board(false);
         root = new GameTreeNode(null, board, favoredPlayer);
 
-        // find all the possible first moves
-        //PathFinder.findAllLegalMoves(board, 0);
         buildTree();
         System.out.println("DONE!");
     }
 
     private void buildTree() {
-        LinkedList<Move> optimalPath = GameTreeNode.generateChildrenRecusively(root, MAX_DEPTH);
-        printMoveList(optimalPath);
+        GameTreeNode.generateChildrenRecusively(root, MAX_DEPTH);
+        
+        GameTreeNode gtn = root;
+
+        while(gtn != null) {
+            bestPath.add(gtn.getBestNextMove());
+            gtn = gtn.getBestNextMoveNode();
+        }
+        
+        printMoveList(bestPath);
     }
 
     private void printMoveList(LinkedList<Move> moves) {

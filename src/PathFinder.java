@@ -88,7 +88,7 @@ public class PathFinder {
      * @param board The board setup to be analyzed
      * @return The available moves
      */
-    public static boolean[][] findAllLegalMoves(Board board, int playerID) {
+    private static boolean[][] findAllLegalMoves(Board board, int playerID) {
 
         boolean[][] moves = new boolean[5][6];
 

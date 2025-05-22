@@ -16,6 +16,8 @@ public class GameTreeNode {
     private int globalFavoredPlayer;
     private int currentFavoredPlayer;
 
+    private int bestNextMoveForPlayerIndex = -1;
+
     Move move;
 
     private Board board;
@@ -44,8 +46,8 @@ public class GameTreeNode {
         this.globalFavoredPlayer = globalFavoredPlayer; 
         this.currentDepth = 0;
 
-        alpha = Integer.MAX_VALUE;
-        beta = Integer.MIN_VALUE;
+        alpha = Integer.MIN_VALUE;
+        beta = Integer.MAX_VALUE;
     }
 
     /**
@@ -61,6 +63,7 @@ public class GameTreeNode {
         this.move = move;
         this.currentFavoredPlayer = MoveHelper.nextPlayer(move.player); //next move favors this player 
         this.currentDepth = depth;
+        this.globalFavoredPlayer = parent.globalFavoredPlayer;
         
         //setting the board to its new state for this node
         board = parent.board.clone();
@@ -82,24 +85,22 @@ public class GameTreeNode {
      * Stops once the given max_depth has been reached or no valid moves are available anymore.
      *
      */
-    public static LinkedList<Move> generateChildrenRecusively(GameTreeNode gtn, int max_depth) {
+    public static void generateChildrenRecusively(GameTreeNode gtn, int max_depth) {
         
-        LinkedList<Move> optimalPath = new LinkedList<>();
+        // LinkedList<Move> optimalPath = new LinkedList<>();
 
         //end condition for recursion
         if(gtn.currentDepth >= max_depth){
-            return optimalPath;
+            return;
         }
 
         //Recursively building the tree
         if(generateChildren(gtn)) {
             for(int i = 0; i < gtn.children.length; i++) {
-                optimalPath = generateChildrenRecusively(gtn.children[i], max_depth);
+                generateChildrenRecusively(gtn.children[i], max_depth);
             }
-            optimalPath.add(updateNodeValue(gtn));
+            gtn.bestNextMoveForPlayerIndex = updateNodeValue(gtn);
         }
-
-        return optimalPath;
     }
 
     /**
@@ -108,13 +109,13 @@ public class GameTreeNode {
      * This forms the basis for the Alpha Beta search.
      * 
      * @param gtn The {@link #GameTreeNode} to propagate the values up to
-     * @return the move which lead to the extrema
+     * @return the index of the move which lead to the extrema
      */
-    private static Move updateNodeValue(GameTreeNode gtn) {
+    private static int updateNodeValue(GameTreeNode gtn) {
         
         boolean min; // whether to min or to max;
         int extremeMinMaxValue = 0;
-        Move minMaxMove = null;
+        int minMaxMoveIndex = -1;
 
         if(gtn.currentFavoredPlayer == gtn.globalFavoredPlayer)
             min = false; //if the current player is the player that needs to win
@@ -127,7 +128,7 @@ public class GameTreeNode {
             for(int i = 0; i < gtn.children.length; i++) {
                 if(gtn.children[i].nodeValue > extremeMinMaxValue) {
                     extremeMinMaxValue = gtn.children[i].nodeValue;
-                    minMaxMove = gtn.children[i].move;
+                    minMaxMoveIndex = i;
                 }
             }
         }
@@ -137,13 +138,13 @@ public class GameTreeNode {
             for(int i = 0; i < gtn.children.length; i++) {
                 if(gtn.children[i].nodeValue < extremeMinMaxValue) {
                     extremeMinMaxValue = gtn.children[i].nodeValue;
-                    minMaxMove = gtn.children[i].move;
+                    minMaxMoveIndex = i;
                 }
             }
         }
 
         gtn.nodeValue = extremeMinMaxValue;
-        return minMaxMove;
+        return minMaxMoveIndex;
     }
 
     /**
@@ -162,7 +163,6 @@ public class GameTreeNode {
         for(int i = 0; i < moves.size(); i++) {
             gtn.children[i] = new GameTreeNode(gtn, moves.get(i), gtn.currentDepth+1);
         }
-        
         //checks if valid moves exist
         if(gtn.children.length > 0)
             return true;
@@ -180,5 +180,20 @@ public class GameTreeNode {
             ", globalFavoredPlayer=" + globalFavoredPlayer +
             ", children=" + (children != null ? children.length : 0) +
             '}';
+    }
+
+    public GameTreeNode getBestNextMoveNode() {
+
+        if(bestNextMoveForPlayerIndex != -1)
+            return children[bestNextMoveForPlayerIndex];
+        else
+            return null;
+    }
+
+    public Move getBestNextMove() {
+        if(bestNextMoveForPlayerIndex != -1)
+            return children[bestNextMoveForPlayerIndex].move;
+        else
+            return null;
     }
 }
