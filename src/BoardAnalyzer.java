@@ -3,21 +3,23 @@ public class BoardAnalyzer {
     //if issues arise, change so that only the position of the given player gets evaluated 
     public static int evaluatePlayerPosition(Board board, int player) {
 
-        int[] playerPointsThisRound = calculatePointsForRound(board);
+        return calculatePointsForRound(board)[player];
 
-        int topOpponentPointsThisRound = 0;
+        // int[] playerPointsThisRound = calculatePointsForRound(board);
 
-        for(int i = 0; i < GameState.MAX_PLAYERS; i++) {
-            if(i == player) //don't calculate for the evaluated player, to enable comparisons
-                continue;
+        // int topOpponentPointsThisRound = 0;
 
-            if (playerPointsThisRound[i] > topOpponentPointsThisRound) {
-                topOpponentPointsThisRound = playerPointsThisRound[i];
-            }
-        }
+        // for(int i = 0; i < GameState.MAX_PLAYERS; i++) {
+        //     if(i == player) //don't calculate for the evaluated player, to enable comparisons
+        //         continue;
 
-        // returned value not smaller than 0
-        return Math.max(0, playerPointsThisRound[player] - topOpponentPointsThisRound);
+        //     if (playerPointsThisRound[i] > topOpponentPointsThisRound) {
+        //         topOpponentPointsThisRound = playerPointsThisRound[i];
+        //     }
+        // }
+
+        // // returned value not smaller than 0
+        // return Math.max(0, playerPointsThisRound[player] - topOpponentPointsThisRound);
     }
 
     private static int[] calculatePointsForRound(Board board) {
