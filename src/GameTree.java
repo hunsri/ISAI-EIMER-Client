@@ -1,16 +1,13 @@
-import java.util.HashMap;
 import java.util.LinkedList;
-
-import lenz.htw.eimer.Move;
 
 public class GameTree {
 
     //four rounds
-    public static int MAX_DEPTH = 2*GameState.MAX_PLAYERS;
+    public static int MAX_DEPTH = 3*GameState.MAX_PLAYERS;
 
     private GameTreeNode root;
 
-    private HashMap<String, GameTreeNode> archive;
+    // private HashMap<String, GameTreeNode> archive;
 
     private LinkedList<GameTreeNode> bestNodePath = new LinkedList<GameTreeNode>();
 
@@ -21,13 +18,12 @@ public class GameTree {
         buildTree();
         System.out.println("DONE!");
 
+        fillBestMoveList(root);
         printNodeList(bestNodePath);
     }
 
     private void buildTree() {
         GameTreeNode.generateChildrenRecursively(root, MAX_DEPTH);
-        
-        GameTreeNode gtn = root;
 
         int index = 0;
         GameTreeNode node = root;
@@ -55,22 +51,37 @@ public class GameTree {
         if(gtn.children == null)
             return null;
 
+        int index = -1;
+
+        System.out.println("----"+ gtn.getDepth() +"----");
+
         for(int i = 0; i < gtn.children.length; i++) {
-            if(gtn.children[i].alpha == gtn.alpha)
-                return gtn.children[i];
+            System.out.println("["+ i + "] ALPHA: "+gtn.children[i].alpha + " | " + gtn.alpha + " | " + gtn.beta);
+            if(gtn.children[i].alpha >= gtn.alpha)
+                index = i;
+                // return gtn.children[i];
         }
-        return null;
+        
+        return gtn.children[index];
     }
 
     private GameTreeNode pickBetaMove(GameTreeNode gtn) {
         if(gtn.children == null)
             return null;
 
+        int index = -1;
+
+        System.out.println("----"+ gtn.getDepth() +"----");
+
         for(int i = 0; i < gtn.children.length; i++) {
-            if(gtn.children[i].beta == gtn.beta)
-                return gtn.children[i];
+            System.out.println("["+ i + "] BETA: "+gtn.children[i].beta + " | " + gtn.alpha + " | " + gtn.beta);
+            if(gtn.children[i].beta <= gtn.beta)
+                index = i;   
+                // return gtn.children[i];
         }
-        return null;
+
+
+        return gtn.children[index];
     }
 
     private void printNodeList(LinkedList<GameTreeNode> gtns){

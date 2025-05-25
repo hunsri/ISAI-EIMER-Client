@@ -15,19 +15,6 @@ public class PathFinder {
         this.gameState = gameState;
     } 
 
-    private int highestEnemyCount(int ring) {
-        
-        int ret = 0;
-        
-        for(int i = 0; i < GameState.MAX_PLAYERS; i++) {
-            if(i == playerID)
-                continue;
-            ret = gameState.getBoard().getStonesOnRingForPlayer(i, ring);
-        }
-
-        return ret;
-    }
-
     public Move pickRandomMove() {
         Move move = new Move(playerID, 0, 0);
 

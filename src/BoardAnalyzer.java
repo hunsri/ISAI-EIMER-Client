@@ -1,25 +1,10 @@
 public class BoardAnalyzer {
 
-    //if issues arise, change so that only the position of the given player gets evaluated 
     public static int evaluatePlayerPosition(Board board, int player) {
 
-        return calculatePointsForRound(board)[player];
+        int playerScore = calculatePointsForRound(board)[player];
+        return playerScore;
 
-        // int[] playerPointsThisRound = calculatePointsForRound(board);
-
-        // int topOpponentPointsThisRound = 0;
-
-        // for(int i = 0; i < GameState.MAX_PLAYERS; i++) {
-        //     if(i == player) //don't calculate for the evaluated player, to enable comparisons
-        //         continue;
-
-        //     if (playerPointsThisRound[i] > topOpponentPointsThisRound) {
-        //         topOpponentPointsThisRound = playerPointsThisRound[i];
-        //     }
-        // }
-
-        // // returned value not smaller than 0
-        // return Math.max(0, playerPointsThisRound[player] - topOpponentPointsThisRound);
     }
 
     private static int[] calculatePointsForRound(Board board) {
@@ -31,8 +16,9 @@ public class BoardAnalyzer {
 
             if(playerWithMostStones >= 0) {
 
-                if(ring == 3)
+                if(ring == 0) {
                     playerPointsForRound[playerWithMostStones] += 2;
+                }
                 else
                     playerPointsForRound[playerWithMostStones] += 1;
             }

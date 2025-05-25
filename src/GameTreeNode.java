@@ -90,35 +90,38 @@ public class GameTreeNode {
             updateAlphaBetaVertically(gtn);
             return;
         }
+        
         // alpha/beta cut
-        if(shouldCut(gtn)){
-            updateAlphaBetaVertically(gtn);
-            return;
-        }
+        // if(shouldCut(gtn)){
+        //     updateAlphaBetaVertically(gtn);
+        //     return;
+        // }
 
         //Recursively building the tree from this node
         if(!generateChildren(gtn)) { //...but only if there are valid moves
             updateAlphaBetaVertically(gtn);
             return;   
         }
-
+        //Tree building
         for(int i = 0; i < gtn.children.length; i++) {
             
             //check if a cut should happen, based on the found values within the siblings
-            updateAlphaBetaHorizontally(gtn, i);
+            // updateAlphaBetaHorizontally(gtn, i);
             if(shouldCut(gtn)) {
+                // System.out.println("cut!");
                 break;
             }
             
             generateChildrenRecursively(gtn.children[i], max_depth);
-        }
 
-        if (gtn.children != null && gtn.children.length > 0) {
-            gtn.alpha = Integer.MIN_VALUE;
-            gtn.beta = Integer.MAX_VALUE;
-            for (GameTreeNode child : gtn.children) {
-                gtn.alpha = Math.max(gtn.alpha, child.alpha);
-                gtn.beta = Math.min(gtn.beta, child.beta);
+            //TODO OPTIMIZE!
+            if (gtn.children != null && gtn.children.length > 0) {
+                gtn.alpha = Integer.MIN_VALUE;
+                gtn.beta = Integer.MAX_VALUE;
+                for (GameTreeNode child : gtn.children) {
+                    gtn.alpha = Math.max(gtn.alpha, child.alpha);
+                    gtn.beta = Math.min(gtn.beta, child.beta);
+                }
             }
         }
     }
@@ -130,6 +133,16 @@ public class GameTreeNode {
      * @param ownChildIndex
      */
     private static void updateAlphaBetaHorizontally(GameTreeNode gtn, int ownChildIndex){
+        // if(gtn.parent == null || ownChildIndex == 0)
+        //     return;
+        
+        // if(gtn.currentFavoredPlayer == gtn.globalFavoredPlayer) {
+        //     gtn.alpha =  Math.max(gtn.parent.children[ownChildIndex-1].alpha, gtn.alpha);
+        // } else {
+        //     gtn.beta = Math.min(gtn.parent.children[ownChildIndex-1].beta, gtn.beta);
+        // }
+        
+
         if(gtn.parent == null)
             return;
         
@@ -138,12 +151,11 @@ public class GameTreeNode {
         } else {
             gtn.beta = gtn.parent.beta;
         }
-        
-        
+
+
         // if(gtn.currentFavoredPlayer == gtn.globalFavoredPlayer) {
         //     gtn.alpha = fetchAlphaFromSibling(gtn, ownChildIndex);
-        // } else
-        // {
+        // } else {
         //     gtn.beta = fetchBetaFromSibling(gtn, ownChildIndex);
         // }
     }
@@ -163,8 +175,14 @@ public class GameTreeNode {
     }
 
     private static boolean shouldCut(GameTreeNode gtn){
-        
-        return gtn.alpha >= gtn.beta;
+
+        if(gtn.parent == null)
+            return false;
+
+        if(gtn.parent.currentFavoredPlayer == gtn.parent.globalFavoredPlayer)
+            return gtn.parent.alpha > gtn.alpha;
+        else //TODO check beta cut!
+            return gtn.alpha > gtn.parent.alpha;
     }
 
     /**
@@ -212,16 +230,19 @@ public class GameTreeNode {
             return false;
     }
 
+    //FIXME potentially revert to original
     private static int currentCummulativeBoardValue(GameTreeNode gtn) {
 
         if(gtn.parent == null)
             return 0; //root has no parent
 
-        if(gtn.currentFavoredPlayer == gtn.globalFavoredPlayer) {
-            return gtn.parent.cummulativeBoardValue + BoardAnalyzer.evaluatePlayerPosition(gtn.board, gtn.currentFavoredPlayer);
-        } else {
-            return gtn.parent.cummulativeBoardValue - BoardAnalyzer.evaluatePlayerPosition(gtn.board, gtn.currentFavoredPlayer);
+        int boardScore = gtn.parent.cummulativeBoardValue;
+        if(gtn.parent.currentFavoredPlayer != gtn.parent.globalFavoredPlayer) {
+            boardScore -= BoardAnalyzer.evaluatePlayerPosition(gtn.board, gtn.parent.currentFavoredPlayer); //lower score
         }
+
+        boardScore += BoardAnalyzer.evaluatePlayerPosition(gtn.board, gtn.parent.globalFavoredPlayer); //push score
+        return boardScore;
     }
 
     @Override
@@ -248,5 +269,9 @@ public class GameTreeNode {
 
     public Board getBoard() {
         return board;
+    }
+
+    public int getDepth() {
+        return currentDepth;
     }
 }
