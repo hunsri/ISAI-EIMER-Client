@@ -5,9 +5,7 @@ public class Board {
     public final static int RINGS = 4;
 
     public Board(boolean blank) {
-        // take board representation out of gamestate
-        
-        if(!blank)
+        if(!blank) //should board be at start position
             initBoard();
     }
 

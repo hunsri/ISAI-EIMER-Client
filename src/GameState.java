@@ -4,8 +4,6 @@ public class GameState {
 
     public static final int MAX_PLAYERS = 3;
 
-    public static boolean balanced = false;
-
     private int round = 0;
 
     private Board board = new Board(false);

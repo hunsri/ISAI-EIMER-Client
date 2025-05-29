@@ -2,6 +2,7 @@ public class BoardAnalyzer {
 
     public static int evaluatePlayerPosition(Board board, int player) {
 
+        //TODO punish for wasting stones
         int playerScore = calculatePointsForRound(board)[player];
 
         return playerScore;

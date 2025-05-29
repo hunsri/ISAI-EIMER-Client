@@ -10,14 +10,30 @@ import lenz.htw.eimer.*;
 public class AClient {
     public static void main(String[] args) throws IOException {
 
-        NetworkClient client = new NetworkClient("127.0.0.1", "AClient", ImageIO.read(new File("res/playerIconA.png")));
+
+        String clientName = "AClient";
+        int randomness = 0;
+        int argumentsFound = 0;
+
+        // Check if args[0] is of type String
+        if (args.length > 0 && args[0] instanceof String) {
+            clientName = args[0];
+            argumentsFound += 1;
+        }
+        if(args.length > 1 && args[1] instanceof String) {
+            try {
+                randomness = Integer.parseInt(args[1]);
+                argumentsFound += 1;
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid randomness value, using default: " + randomness);
+            }
+        }
+        System.out.println("Arguments found: "+ argumentsFound);
+
+        NetworkClient client = new NetworkClient("127.0.0.1", clientName, ImageIO.read(new File("res/playerIconA.png")));
 
         GameState gameState = new GameState();
         int ownPlayerNumber = client.getMyPlayerNumber();
-        
-        // GameTree gameTree = new GameTree(ownPlayerNumber, 1);
-        
-        // PathFinder pathFinder = new PathFinder(ownPlayerNumber, gameState);
 
         client.getTimeLimitInSeconds();
         client.getExpectedNetworkLatencyInMilliseconds();
@@ -31,30 +47,15 @@ public class AClient {
                 System.out.println("Move played: "+ move);
                 gameState.moveStones(move);
                 
-                if(isMyTurn(move.player, ownPlayerNumber)) {
-                    move = optimalMove(ownPlayerNumber, gameState.getBoard().clone(), move);
-
-                    System.out.println("Sending Move: "+ move);
-                    client.sendMove(move);
-                }
-                // Zug in meine Spielbrettrepräsentation einbauen
+                handleMove(client, move, ownPlayerNumber, gameState, randomness);
             }
 
+            // ensuring that client is moving if it gets the first move of the game
             if(gameState.getRound() == 0 && ownPlayerNumber == 0) {
                 move = optimalMove(ownPlayerNumber, gameState.getBoard().clone(), null);
                 System.out.println("Sending Move: "+ move);
                 client.sendMove(move);
             }
-
-            //move = besonders clever berechneter Zug
-            // boolean dontMove = true;
-            // while(dontMove){
-            //     String input = System.console().readLine();
-            //     if(input == "");
-            //         dontMove = false;
-            // }
-
-            // move = pathFinder.pickRandomMove();
 
             gameState.incrementRound();
         }
@@ -72,5 +73,30 @@ public class AClient {
 
         GameTree gameTree = new GameTree(ownPlayerNumber, treeDepth, board, lastMove);
         return gameTree.optimalMove();
+    }
+
+    private static boolean shouldRandom(float randomnessValue) {
+        int randomValue = (int) (Math.random() * 100);
+        return randomValue < randomnessValue;
+    }
+
+    private static void handleMove(NetworkClient client, Move lastMove, int ownPlayerNumber, GameState gameState, int randomnessValue) {
+        if(!isMyTurn(lastMove.player, ownPlayerNumber)) {
+            return;
+        }
+        
+        Move move = null;
+        PathFinder pathFinder = new PathFinder(ownPlayerNumber, gameState);
+
+        if(shouldRandom(randomnessValue)) {
+            move = pathFinder.pickRandomMove();
+        } else {
+            move = optimalMove(ownPlayerNumber, gameState.getBoard(), lastMove);
+        }
+        
+        if(move != null) {
+            System.out.println("Sending Move: "+ move);
+            client.sendMove(move);
+        }
     }
 }

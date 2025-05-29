@@ -8,18 +8,7 @@ public class GameTree {
 
     private LinkedList<GameTreeNode> bestNodePath = new LinkedList<GameTreeNode>();
 
-    public GameTree(int favoredPlayer, int treeRoundDepth){
-        Board board = new Board(false);
-        root = new GameTreeNode(null, board, favoredPlayer);
-
-        buildTree(treeRoundDepth*GameState.MAX_PLAYERS);
-
-        fillBestMoveList(root);
-        // printNodeList(bestNodePath);
-    }
-
     public GameTree(int favoredPlayer, int treeRoundDepth, Board board, Move lastMove) {
-        
         
         root = new GameTreeNode(lastMove, board.clone(), favoredPlayer);
 
@@ -88,7 +77,7 @@ public class GameTree {
     }
 
     public Move optimalMove() {
-        return bestNodePath.get(1).move; //accessing the first move after the provided move;
+        return bestNodePath.get(1).move; //accessing the first move after the root, which is the previous move;
     }
 
     private void printNodeList(LinkedList<GameTreeNode> gtns){
