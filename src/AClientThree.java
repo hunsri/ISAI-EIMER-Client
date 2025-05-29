@@ -7,10 +7,10 @@ import lenz.htw.eimer.net.NetworkClient;
 import lenz.htw.eimer.*;
 
 
-public class AClient {
+public class AClientThree {
     public static void main(String[] args) throws IOException {
 
-        NetworkClient client = new NetworkClient("127.0.0.1", "AClient", ImageIO.read(new File("res/playerIconA.png")));
+        NetworkClient client = new NetworkClient("127.0.0.1", "BClient", ImageIO.read(new File("res/playerIconA.png")));
 
         GameState gameState = new GameState();
         int ownPlayerNumber = client.getMyPlayerNumber();

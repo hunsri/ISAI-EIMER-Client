@@ -4,6 +4,8 @@ public class GameState {
 
     public static final int MAX_PLAYERS = 3;
 
+    public static boolean balanced = false;
+
     private int round = 0;
 
     private Board board = new Board(false);
@@ -26,31 +28,16 @@ public class GameState {
         board.moveStoneForPlayer(move.player, move.second);
     }
 
-    public void calculateScores() {
-        for(int i = 0; i < 4; i++) {
-            calculateScoreForRing(i);
-        }
-    }
-
-    private void calculateScoreForRing(int ring) {
-        
-        int playerWithMostStones = board.getPlayerWithMostStones(ring);
-
-        if(playerWithMostStones >= 0) {
-
-            if(ring == 3)
-                playerScores[playerWithMostStones] += 2;
-            else
-                playerScores[playerWithMostStones] += 1;
-        }
-    }
-
     public Board getBoard() {
         return board;
     }
 
     public Board getBoardByValue() {
         return board.clone();
+    }
+
+    public int getRound() {
+        return round;
     }
 
     @Override

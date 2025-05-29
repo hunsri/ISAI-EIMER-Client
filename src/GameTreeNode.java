@@ -4,6 +4,8 @@ import lenz.htw.eimer.Move;
 
 public class GameTreeNode {
 
+    public static int createdNodes = 0;
+
     public int alpha;
     public int beta;
 
@@ -16,6 +18,8 @@ public class GameTreeNode {
     private int currentFavoredPlayer;
 
     private int cummulativeBoardValue;
+
+    public boolean cut = false;
 
     Move move;
 
@@ -83,6 +87,8 @@ public class GameTreeNode {
      */
     public static void generateChildrenRecursively(GameTreeNode gtn, int max_depth) {
         
+        createdNodes++;
+
         //end conditions for recursion
         //leafs reached
         if(gtn.currentDepth >= max_depth) {
@@ -90,14 +96,8 @@ public class GameTreeNode {
             updateAlphaBetaVertically(gtn);
             return;
         }
-        
-        // alpha/beta cut
-        // if(shouldCut(gtn)){
-        //     updateAlphaBetaVertically(gtn);
-        //     return;
-        // }
 
-        //Recursively building the tree from this node
+        //Recursively building the tree by adding children to this node
         if(!generateChildren(gtn)) { //...but only if there are valid moves
             updateAlphaBetaVertically(gtn);
             return;   
@@ -105,59 +105,25 @@ public class GameTreeNode {
         //Tree building
         for(int i = 0; i < gtn.children.length; i++) {
             
-            //check if a cut should happen, based on the found values within the siblings
-            // updateAlphaBetaHorizontally(gtn, i);
+            generateChildrenRecursively(gtn.children[i], max_depth);
+
+            //Updating the current node value, based on the children
+            gtn.alpha = Math.max(gtn.alpha, gtn.children[i].alpha);
+            gtn.beta = Math.min(gtn.beta, gtn.children[i].beta);
+            
+
             if(shouldCut(gtn)) {
                 // System.out.println("cut!");
                 break;
             }
-            
-            generateChildrenRecursively(gtn.children[i], max_depth);
-
-            //TODO OPTIMIZE!
-            if (gtn.children != null && gtn.children.length > 0) {
-                gtn.alpha = Integer.MIN_VALUE;
-                gtn.beta = Integer.MAX_VALUE;
-                for (GameTreeNode child : gtn.children) {
-                    gtn.alpha = Math.max(gtn.alpha, child.alpha);
-                    gtn.beta = Math.min(gtn.beta, child.beta);
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates the Alpha Beta value based on the siblings
-     * 
-     * @param gtn
-     * @param ownChildIndex
-     */
-    private static void updateAlphaBetaHorizontally(GameTreeNode gtn, int ownChildIndex){
-        // if(gtn.parent == null || ownChildIndex == 0)
-        //     return;
-        
-        // if(gtn.currentFavoredPlayer == gtn.globalFavoredPlayer) {
-        //     gtn.alpha =  Math.max(gtn.parent.children[ownChildIndex-1].alpha, gtn.alpha);
-        // } else {
-        //     gtn.beta = Math.min(gtn.parent.children[ownChildIndex-1].beta, gtn.beta);
-        // }
-        
-
-        if(gtn.parent == null)
-            return;
-        
-        if(gtn.currentFavoredPlayer == gtn.globalFavoredPlayer) {
-            gtn.alpha = gtn.parent.alpha;
-        } else {
-            gtn.beta = gtn.parent.beta;
         }
 
-
-        // if(gtn.currentFavoredPlayer == gtn.globalFavoredPlayer) {
-        //     gtn.alpha = fetchAlphaFromSibling(gtn, ownChildIndex);
-        // } else {
-        //     gtn.beta = fetchBetaFromSibling(gtn, ownChildIndex);
-        // }
+        //Updating the value of the parent, to ensure that siblings stay updated as well.
+        //Siblings may reference parent value for horizontal updates
+        if(gtn.parent != null) {
+            gtn.parent.alpha = Math.max(gtn.alpha, gtn.parent.alpha);
+            gtn.parent.beta = Math.min(gtn.beta, gtn.parent.beta);
+        }
     }
 
     private static void updateAlphaBetaVertically(GameTreeNode gtn) {
@@ -174,15 +140,38 @@ public class GameTreeNode {
         }
     }
 
+    /**
+     * Should be called after the first child element has been evaluated
+     * 
+     * @param gtn
+     * @return
+     */
     private static boolean shouldCut(GameTreeNode gtn){
+
+        boolean ret = false;
 
         if(gtn.parent == null)
             return false;
 
+        //ALPHA CUT
         if(gtn.parent.currentFavoredPlayer == gtn.parent.globalFavoredPlayer)
-            return gtn.parent.alpha > gtn.alpha;
-        else //TODO check beta cut!
-            return gtn.alpha > gtn.parent.alpha;
+            if(gtn.parent.alpha > gtn.alpha)
+                ret = true;
+        
+        if(gtn.children.length > 0)
+        //BETA CUT
+        //needs to ensure that when a better alpha value is among one child, the tree gets cut
+        if(gtn.children[0].currentFavoredPlayer == gtn.children[0].globalFavoredPlayer) {
+            if(gtn.alpha > gtn.parent.alpha)
+                return true;
+        }
+
+        //marking this node as having a cut
+        if(ret){
+            gtn.cut = true;
+        }
+
+        return ret;
     }
 
     /**
@@ -197,13 +186,6 @@ public class GameTreeNode {
             int value = currentCummulativeBoardValue(gtn);
             gtn.alpha = value;
             gtn.beta = value;
-            
-            //more textbook approach
-            // if (gtn.currentFavoredPlayer == gtn.globalFavoredPlayer) {
-            //     gtn.alpha = value;
-            // } else {
-            //     gtn.beta = value;
-            // }
         }
     }
 
@@ -230,12 +212,12 @@ public class GameTreeNode {
             return false;
     }
 
-    //FIXME potentially revert to original
     private static int currentCummulativeBoardValue(GameTreeNode gtn) {
 
         if(gtn.parent == null)
             return 0; //root has no parent
 
+        //evaluate the current score, based on who moved last
         int boardScore = gtn.parent.cummulativeBoardValue;
         if(gtn.parent.currentFavoredPlayer != gtn.parent.globalFavoredPlayer) {
             boardScore -= BoardAnalyzer.evaluatePlayerPosition(gtn.board, gtn.parent.currentFavoredPlayer); //lower score

@@ -3,8 +3,8 @@ public class BoardAnalyzer {
     public static int evaluatePlayerPosition(Board board, int player) {
 
         int playerScore = calculatePointsForRound(board)[player];
-        return playerScore;
 
+        return playerScore;
     }
 
     private static int[] calculatePointsForRound(Board board) {
@@ -15,8 +15,7 @@ public class BoardAnalyzer {
             int playerWithMostStones = board.getPlayerWithMostStones(ring);
 
             if(playerWithMostStones >= 0) {
-
-                if(ring == 0) {
+                if(ring == 3) {
                     playerPointsForRound[playerWithMostStones] += 2;
                 }
                 else

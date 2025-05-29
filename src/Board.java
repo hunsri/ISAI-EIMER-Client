@@ -80,23 +80,6 @@ public class Board {
         return ret;
     }
 
-    private int playerScoreForBoard(int player) {
-
-        int scoreForThisBoard = 0;
-
-        for(int i = 0; i < RINGS; i++)
-        {
-            if(getPlayerWithMostStones(i)== player)
-            {
-                if(i == 3)
-                    scoreForThisBoard += 2;
-                else
-                    scoreForThisBoard += 1;
-            }
-        }
-        return scoreForThisBoard;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
