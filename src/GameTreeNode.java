@@ -219,11 +219,13 @@ public class GameTreeNode {
 
         //evaluate the current score, based on who moved last
         int boardScore = gtn.parent.cummulativeBoardValue;
-        if(gtn.parent.currentFavoredPlayer != gtn.parent.globalFavoredPlayer) {
+        if(gtn.parent.currentFavoredPlayer == gtn.parent.globalFavoredPlayer) {
+            boardScore += BoardAnalyzer.evaluatePlayerPosition(gtn.board, gtn.parent.currentFavoredPlayer);
+        } else {
             boardScore -= BoardAnalyzer.evaluatePlayerPosition(gtn.board, gtn.parent.currentFavoredPlayer); //lower score
         }
 
-        boardScore += BoardAnalyzer.evaluatePlayerPosition(gtn.board, gtn.parent.globalFavoredPlayer); //push score
+        //boardScore += BoardAnalyzer.evaluatePlayerPosition(gtn.board, gtn.parent.globalFavoredPlayer); //push score
         return boardScore;
     }
 

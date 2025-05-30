@@ -1,3 +1,6 @@
+# Ignoring the result files of the evaluation process
+res/evaluation/*
+
 # Compiled class files
 *.class
 
