@@ -17,10 +17,11 @@ setlocal EnableDelayedExpansion
 echo %UsedParameters% > res/evaluation/latestParameters.txt
 
 echo "launching server..."
-start cmd /K "java -Djava.library.path=lib/lib/native -jar "lib\eimer.jar" 8 headless > res/evaluation/output.txt"
+start cmd /C "java -Djava.library.path=lib/lib/native -jar "lib\eimer.jar" 8 headless > res/evaluation/output.txt"
 
 start cmd /C "cd AClient & java -cp "bin;lib\eimer.jar" AClient %FirstName% %FirstRandom%"
 
 start cmd /C "cd AClient & java -cp "bin;lib\eimer.jar" AClient %SecondName% %SecondRandom%"
 
-start cmd /C "cd AClient & java -cp "bin;lib\eimer.jar" AClient %ThirdName% %ThirdRandom%"
+start /WAIT  cmd /C "cd AClient & java -cp "bin;lib\eimer.jar" AClient %ThirdName% %ThirdRandom%"
+echo DONE > res/evaluation/done.txt
