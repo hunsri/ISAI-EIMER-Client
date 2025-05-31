@@ -1,21 +1,21 @@
 ## Student Project for Interactive Systems AI (SoSe 2025)
 
-To demo run the app under Windows you can use the following BATCH commands
+### Overview
 
-```batch
-echo "START!"
+This project is an AI-based application developed for the Interactive Systems AI course. It features an Alpha Beta Search for decision-making and an evolutionary learning algorithm for improving AI performance. The implementation is designed to run on Windows and includes scripts for evaluation and demonstration.
 
-echo "launching server..."
-start java -Djava.library.path=eimer/lib/native -jar "eimer\eimer.jar"
+### Alpha Beta Search AI
+
+The AI implementation utilizes an Alpha Beta Search. 
+It is primarily handled by the `GameTree`, `GameTreeNode` and `BoardAnalyzer` classes.
+
+### Evolutionary Learning Algorithm
+
+The learning algorithm is handled by the `Evaluator` class, which calls `EvalScript.bat`. Note that this only works under Windows <br>
+The results of the last iteration are saved within `res/evaluation`. Note that the directory gets cleared on each rerun.
 
 
-echo "launching client 1"
-start cmd /K "cd AClient & java -cp "bin;lib\eimer.jar" AClient"
+### Running the application
 
-echo "launching client 2"
-start cmd /C "cd AClient & java -cp "bin;lib\eimer.jar" DemoClient"
-
-echo "launching client 3"
-start cmd /C "cd AClient & java -cp "bin;lib\eimer.jar" DemoClient"
-```
+To demo run the application under Windows, you can use the [`DemoScript.bat`](./DemoScript.bat) file.
 
